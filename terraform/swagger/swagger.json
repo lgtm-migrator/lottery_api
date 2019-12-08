@@ -1,0 +1,202 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is an API to get information about the ohio lottery",
+    "version": "1.0.0",
+    "title": "Lottery API",
+    "contact": {
+      "email": "joey@apollorion.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "${host}",
+  "basePath": "/v1",
+  "tags": [
+    {
+      "name": "Scratch Offs",
+      "description": "Information about Scratch Offs"
+    }
+  ],
+  "schemes": [
+    "${schema}"
+  ],
+  "paths": {
+    "/scratchOffs/all": {
+      "get": {
+        "tags": [
+          "Scratch Offs"
+        ],
+        "summary": "Get all scratch off information",
+        "description": "Gets scratch off information",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Good request"
+          }
+        }
+      }
+    },
+    "/scratchOffs/supported": {
+      "get": {
+        "tags": [
+          "Scratch Offs"
+        ],
+        "summary": "Get all supported scratchoffs",
+        "description": "Lists all supported scratchoffs and amounts",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Good request"
+          }
+        }
+      }
+    },
+    "/scratchOffs/lastUpdated": {
+      "get": {
+        "tags": [
+          "Scratch Offs"
+        ],
+        "summary": "Date all the scratch off information was last updated.",
+        "description": "Date all the scratch off information was last updated.",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Good request"
+          }
+        }
+      }
+    },
+    "/scratchOffs/{amount}/all": {
+      "get": {
+        "tags": [
+          "Scratch Offs"
+        ],
+        "summary": "Gets all scratchOffs in the current amount.",
+        "description": "Gets all scratchOffs in the current amount.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "amount",
+            "required": true,
+            "type": "string",
+            "description": "Amount of the scratchoff, without dollar sign"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Good request"
+          },
+          "404": {
+            "description": "amount not found"
+          }
+        }
+      }
+    },
+    "/scratchOffs/{amount}/supported": {
+      "get": {
+        "tags": [
+          "Scratch Offs"
+        ],
+        "summary": "Gets all scratchOffs supported in the current amount.",
+        "description": "Gets all scratchOffs supported in the current amount.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "amount",
+            "required": true,
+            "type": "string",
+            "description": "Amount of the scratchoff, without dollar sign"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Good request"
+          },
+          "404": {
+            "description": "amount not found"
+          }
+        }
+      }
+    },
+    "/scratchOffs/{amount}/lastUpdated": {
+      "get": {
+        "tags": [
+          "Scratch Offs"
+        ],
+        "summary": "When the last time this amount was last updated.",
+        "description": "when the last time this amount was last updated.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "amount",
+            "required": true,
+            "type": "string",
+            "description": "Amount of the scratchoff, without dollar sign"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Good request"
+          },
+          "404": {
+            "description": "amount not found"
+          }
+        }
+      }
+    },
+    "/scratchOffs/{amount}/{gameKey}": {
+      "get": {
+        "tags": [
+          "Scratch Offs"
+        ],
+        "summary": "Gets a specific scratchoff",
+        "description": "Gets a specific scratchoff.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "amount",
+            "required": true,
+            "type": "string",
+            "description": "Amount of the scratchoff, without dollar sign"
+          },
+          {
+            "in": "path",
+            "name": "gameKey",
+            "required": true,
+            "type": "string",
+            "description": "Game key, can be found by making a request to /supported"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Good request"
+          },
+          "404": {
+            "description": "amount/gameKey not found"
+          }
+        }
+      }
+    }
+  }
+}

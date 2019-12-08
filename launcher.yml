@@ -1,0 +1,100 @@
+---
+- name: "Launcher for Lottery API"
+  hosts: localhost
+  connection: local
+  vars:
+    aws_config:
+      region: "us-east-2"
+      profile: "default"
+    terraform:
+      state: "present"
+      backend_config:
+        bucket: "apollorion-tfstates"
+        key: "lottery_api.tfstate"
+      vars:
+        dump_bucket_name: "lottery-api"
+        https_enabled: false
+        # Optional:
+        # docs_base_url: "terraform.apollorion.com"
+
+  tasks:
+
+    - name: "Verify required variables are set"
+      assert:
+        that:
+          - aws_config.region is defined
+          - aws_config.profile is defined
+          - terraform.state is defined
+          - terraform.backend_config.bucket is defined
+          - terraform.backend_config.key is defined
+          - terraform.vars.dump_bucket_name is defined
+          - terraform.vars.https_enabled is defined
+
+    - name: "Set the docs base URL"
+      set_fact:
+        docs_base_url: "{{ terraform.vars.docs_base_url }}"
+      when: terraform.vars.docs_base_url is defined
+
+    - name: "Default the docs base URL"
+      set_fact:
+        docs_base_url: "NOT_SET"
+      when: terraform.vars.docs_base_url is not defined
+
+    - name: "Build Lottery API"
+      block:
+
+        - name: "Create build directory"
+          file:
+            state: directory
+            path: compiled
+
+        - name: "Copy lambda files"
+          command: cp -r lambda/ compiled/
+
+        - name: "Install python modules required for this script"
+          pip:
+            name: "docker"
+
+        - name: "Build Dependencies"
+          docker_container:
+            name: lambda_builder
+            image: lambci/lambda:build-nodejs10.x
+            state: started
+            restart: yes
+            detach: no
+            volumes:
+              - "{{playbook_dir}}/compiled/:/var/task"
+            command: "npm install"
+
+        - name: "Create lambda payload"
+          archive:
+            path: "{{ playbook_dir }}/compiled/"
+            dest: "{{ playbook_dir }}/compiled/lambda_payload.zip"
+            format: zip
+
+        - name: "Terraform Lottery API"
+          terraform:
+            project_path: 'terraform/'
+            state: "{{ terraform.state }}"
+            force_init: true
+            backend_config:
+              region: "{{ aws_config.region }}"
+              bucket: "{{ terraform.backend_config.bucket }}"
+              key: "{{ terraform.backend_config.key }}"
+              profile: "{{ aws_config.profile }}"
+            variables:
+              aws_region: "{{ aws_config.region }}"
+              aws_profile: "{{ aws_config.profile }}"
+              bucket_name: "{{ terraform.vars.dump_bucket_name }}"
+              docs_base_url: "{{ docs_base_url }}"
+              https: "{{ terraform.vars.https_enabled | bool }}"
+
+      rescue:
+        - name: "Just keep swimming"
+          set_fact:
+            compile_failed: true
+
+    - name: "Delete build directory"
+      file:
+        state: absent
+        path: compiled
